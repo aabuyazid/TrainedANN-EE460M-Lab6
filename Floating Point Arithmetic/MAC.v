@@ -54,7 +54,7 @@ always@( posedge clk) begin
     endcase
 end
 //multiply b and c add with a store back in a 
-multiply mul (clk, stMul, c, b, d, doneMul);
-Adder add (clk, stAdd, d, a, e, doneAdd);
+FP_Multiplier mul (clk, stMul, c, b, d, doneMul);
+FP_Adder add (clk, stAdd, d, a, e, doneAdd);
 
 endmodule
