@@ -1,8 +1,5 @@
 # TrainedANN-EE460M-Lab6
 
-
-# Lab Assignment 6
-
 ## Part A
 
 Matrix multiplication using Systolic Arrays
