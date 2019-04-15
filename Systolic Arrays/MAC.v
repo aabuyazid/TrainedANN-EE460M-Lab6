@@ -1,19 +1,27 @@
 `timescale 1ns / 1ps
 
 module MAC(
-input clk,
-input [7:0] b,
-input [7:0] c,
-input stMAC,
-output [7:0] result,
-output done);
+    input clk,
+    input [7:0] b,
+    input [7:0] c,
+    input stMAC,
+    output reg [7:0] result,
+    output reg [7:0] pass_b,
+    output reg [7:0] pass_c,
+    output done
+);
+
 reg [7:0] a=0;
 reg stAdd=0, stMul=0, doneR=0; 
-wire [7:0] e,d; 
+wire [7:0] e,d; 3
 wire doneAdd,doneMul;
 reg [2:0] stateMAC=0;
 assign result = a;
 assign done = doneR;
+initial begin
+    pass_b = 0;
+    pass_c = 0;
+end
 always@( posedge clk) begin
     case(stateMAC)
         3'd0 : begin// start MAC
@@ -44,12 +52,14 @@ always@( posedge clk) begin
             if(doneAdd) begin
                 a <= e;
                 stateMAC <= 6;
+                pass_b <= b;
+                pass_c <= c;
             end
         end
         3'd6: begin// when add is done MAC is done
             doneR <= 1;
             if(stMAC == 0)
-                stateMAC <= 0;
+                stateMAC <= 0; 
         end
     endcase
 end
