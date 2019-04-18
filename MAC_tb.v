@@ -17,8 +17,20 @@ initial begin
     stMAC = 1;
     #100 
     stMAC = 0;
-    c = 8'b01001100;
-    b = 8'b01001000;
+    c = 8'b00000000;
+    b = 8'b00000000;
+    #100
+    stMAC = 1;
+    #100
+    stMAC = 0;
+    c = 8'b00000000;
+    b = 8'b00101000;
+    #100
+    stMAC = 1;
+    #100
+    stMAC = 0;
+    c = 8'b01001000;
+    b = 8'b01001100;
     #100
     stMAC = 1;
     #100
@@ -27,7 +39,6 @@ initial begin
     b = 8'b00101000;
     #100
     stMAC = 1;
-    
 end
 
 always
