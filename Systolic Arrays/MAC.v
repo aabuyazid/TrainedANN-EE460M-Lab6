@@ -5,7 +5,7 @@ module MAC(
     input [7:0] b,
     input [7:0] c,
     input stMAC,
-    output reg [7:0] result,
+    output [7:0] result,
     output reg [7:0] pass_b,
     output reg [7:0] pass_c,
     output done
@@ -13,7 +13,7 @@ module MAC(
 
 reg [7:0] a=0;
 reg stAdd=0, stMul=0, doneR=0; 
-wire [7:0] e,d; 3
+wire [7:0] e,d;
 wire doneAdd,doneMul;
 reg [2:0] stateMAC=0;
 assign result = a;
