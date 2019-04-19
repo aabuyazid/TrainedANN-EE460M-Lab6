@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module Sys_Arrays(
     input start,
     input clk,
@@ -64,7 +65,7 @@ reg [7:0] bX0_in, bX1_in, bX2_in;
 wire [7:0] pass_a[2:0][2:0];
 wire [7:0] pass_b[2:0][2:0];
 
-reg [3:0] curr_state;
+reg [4:0] curr_state;
 
 reg clk_div;
 
@@ -114,7 +115,7 @@ initial begin
 end
 
 always@(posedge clk) begin
-    if(clk_counter == 5) begin
+    if(clk_counter == 10) begin
         clk_div = ~clk_div;
         clk_counter = 0;
     end
@@ -146,192 +147,204 @@ always@(posedge clk_div) begin
             bX1_in <= 0;
             bX2_in <= 0;
 
-            stMAC[0][0] = 1;
+            stMAC[0][0] <= 1;
 
             curr_state <= 2;
         end
         2: begin
             stMAC[0][0] <= 0;
             if(doneMAC[0][0])
-                curr_state <= 3;
+                curr_state <= 16;
             else
                 curr_state <= 2;
         end
+        16: begin
+            a0X_in = a[0][1];
+            a1X_in = a[1][0];
+            a2X_in = 0;
+
+            bX0_in = b[1][0];
+            bX1_in = b[0][1];
+            bX2_in = 0;
+            curr_state <= 3;
+        end
         3: begin
-            stMAC[0][0] = 1;
-            stMAC[1][0] = 1;
-            stMAC[0][1] = 1;
-
-            a0X_in <= a[0][1];
-            a1X_in <= a[1][0];
-            a2X_in <= 0;
-
-            bX0_in <= b[1][0];
-            bX1_in <= b[0][1];
-            bX2_in <= 0;
+            stMAC[0][0] <= 1;
+            stMAC[1][0] <= 1;
+            stMAC[0][1] <= 1;
 
             curr_state <= 4;
         end
         4: begin
-            stMAC[0][0] = 0;
-            stMAC[1][0] = 0;
-            stMAC[0][1] = 0;
+            stMAC[0][0] <= 0;
+            stMAC[1][0] <= 0;
+            stMAC[0][1] <= 0;
 
             if(doneMAC[0][0] && doneMAC[0][1] && doneMAC[1][0])
-                curr_state <= 5;
+                curr_state <= 17;
             else
                 curr_state <= 4;
         end
+        17: begin
+            a0X_in = a[0][2];
+            a1X_in = a[1][1];
+            a2X_in = a[2][0];
+
+            bX0_in = b[2][0];
+            bX1_in = b[1][1];
+            bX2_in = b[0][2];
+            curr_state <= 5;
+        end
         5: begin
-            stMAC[0][0] = 1;
-            stMAC[1][0] = 1;
-            stMAC[0][1] = 1;
+            stMAC[0][0] <= 1;
+            stMAC[1][0] <= 1;
+            stMAC[0][1] <= 1;
 
-            stMAC[2][0] = 1;
-            stMAC[1][1] = 1;
-            stMAC[0][2] = 1;
-
-            a0X_in <= a[0][2];
-            a1X_in <= a[1][1];
-            a2X_in <= a[2][0];
-
-            bX0_in <= b[2][0];
-            bX1_in <= b[1][1];
-            bX2_in <= b[0][2];
+            stMAC[2][0] <= 1;
+            stMAC[1][1] <= 1;
+            stMAC[0][2] <= 1;
 
             curr_state <= 6;
         end
         6: begin
-            stMAC[0][0] = 0;
-            stMAC[1][0] = 0;
-            stMAC[0][1] = 0;
+            stMAC[0][0] <= 0;
+            stMAC[1][0] <= 0;
+            stMAC[0][1] <= 0;
 
-            stMAC[2][0] = 0;
-            stMAC[1][1] = 0;
-            stMAC[0][2] = 0;
+            stMAC[2][0] <= 0;
+            stMAC[1][1] <= 0;
+            stMAC[0][2] <= 0;
 
             if(doneMAC[0][0] && doneMAC[1][0] && doneMAC[0][1] && 
                 doneMAC[2][0] && doneMAC[1][1] && doneMAC[0][2])
-                curr_state <= 7;
+                curr_state <= 18;
             else
                 curr_state <= 6;
         end
+        18: begin
+            a0X_in = 0;
+            a1X_in = a[1][2];
+            a2X_in = a[2][1];
+
+            bX0_in = 0;
+            bX1_in = b[2][1];
+            bX2_in = b[1][2];
+            curr_state <= 7;
+        end
         7: begin
-            stMAC[1][0] = 1;
-            stMAC[0][1] = 1;
+            stMAC[1][0] <= 1;
+            stMAC[0][1] <= 1;
 
-            stMAC[2][0] = 1;
-            stMAC[1][1] = 1;
-            stMAC[0][2] = 1;
+            stMAC[2][0] <= 1;
+            stMAC[1][1] <= 1;
+            stMAC[0][2] <= 1;
 
-            stMAC[1][2] = 1;
-            stMAC[2][1] = 1;
-
-            a0X_in <= 0;
-            a1X_in <= a[1][2];
-            a2X_in <= a[2][1];
-
-            bX0_in <= 0;
-            bX1_in <= b[2][1];
-            bX2_in <= b[1][2];
+            stMAC[1][2] <= 1;
+            stMAC[2][1] <= 1;
 
             curr_state <= 8;
         end
         8: begin
-            stMAC[1][0] = 0;
-            stMAC[0][1] = 0;
+            stMAC[1][0] <= 0;
+            stMAC[0][1] <= 0;
 
-            stMAC[2][0] = 0;
-            stMAC[1][1] = 0;
-            stMAC[0][2] = 0;
+            stMAC[2][0] <= 0;
+            stMAC[1][1] <= 0;
+            stMAC[0][2] <= 0;
 
-            stMAC[1][2] = 0;
-            stMAC[2][1] = 0;
+            stMAC[1][2] <= 0;
+            stMAC[2][1] <= 0;
 
             if(doneMAC[1][0] && doneMAC[0][1] && doneMAC[2][0] && 
                 doneMAC[1][1] && doneMAC[0][2] && doneMAC[1][2] && doneMAC[2][1])
-                curr_state <= 9;
+                curr_state <= 19;
             else
                 curr_state <= 8;
         end
+        19: begin
+            a0X_in = 0;
+            a1X_in = 0;
+            a2X_in = a[2][2];
+
+            bX0_in = 0;
+            bX1_in = 0;
+            bX2_in = b[2][2];
+            curr_state <= 9;
+        end
         9: begin
-            stMAC[2][0] = 1;
-            stMAC[1][1] = 1;
-            stMAC[0][2] = 1;
+            stMAC[2][0] <= 1;
+            stMAC[1][1] <= 1;
+            stMAC[0][2] <= 1;
 
-            stMAC[1][2] = 1;
-            stMAC[2][1] = 1;
+            stMAC[1][2] <= 1;
+            stMAC[2][1] <= 1;
 
-            stMAC[2][2] = 1;
-
-            a0X_in <= 0;
-            a1X_in <= 0;
-            a2X_in <= a[2][2];
-
-            bX0_in <= 0;
-            bX1_in <= 0;
-            bX2_in <= b[2][2];
+            stMAC[2][2] <= 1;
 
             curr_state <= 10;
         end
         10: begin
-            stMAC[2][0] = 0;
-            stMAC[1][1] = 0;
-            stMAC[0][2] = 0;
+            stMAC[2][0] <= 0;
+            stMAC[1][1] <= 0;
+            stMAC[0][2] <= 0;
 
-            stMAC[1][2] = 0;
-            stMAC[2][1] = 0;
+            stMAC[1][2] <= 0;
+            stMAC[2][1] <= 0;
 
-            stMAC[2][2] = 0;
+            stMAC[2][2] <= 0;
 
             if(doneMAC[2][0] && doneMAC[1][1] && doneMAC[0][2] && 
                 doneMAC[1][2] && doneMAC[2][1] && doneMAC[2][2])
-                curr_state <= 11;
+                curr_state <= 20;
             else
                 curr_state <= 10;
         end
+        20 : begin
+            a0X_in = 0;
+            a1X_in = 0;
+            a2X_in = 0;
+
+            bX0_in = 0;
+            bX1_in = 0;
+            bX2_in = 0;
+            curr_state <= 11;
+        end
         11: begin
-            stMAC[1][2] = 1;
-            stMAC[2][1] = 1;
+            stMAC[1][2] <= 1;
+            stMAC[2][1] <= 1;
 
-            stMAC[2][2] = 1;
-
-            a0X_in <= 0;
-            a1X_in <= 0;
-            a2X_in <= 0;
-
-            bX0_in <= 0;
-            bX1_in <= 0;
-            bX2_in <= 0;
+            stMAC[2][2] <= 1;
 
             curr_state <= 12;
         end
         12: begin
-            stMAC[1][2] = 0;
-            stMAC[2][1] = 0;
+            stMAC[1][2] <= 0;
+            stMAC[2][1] <= 0;
 
-            stMAC[2][2] = 0;
+            stMAC[2][2] <= 0;
 
             if(doneMAC[1][2] && doneMAC[2][1] && doneMAC[2][2])
-                curr_state <= 13;
+                curr_state <= 21;
             else
                 curr_state <= 12;
         end
-        13: begin
-            stMAC[2][2] = 1;
+        21 : begin
+            a0X_in = 0;
+            a1X_in = 0;
+            a2X_in = 0;
 
-            a0X_in <= 0;
-            a1X_in <= 0;
-            a2X_in <= 0;
-
-            bX0_in <= 0;
-            bX1_in <= 0;
-            bX2_in <= 0;
+            bX0_in = 0;
+            bX1_in = 0;
+            bX2_in = 0;
+            curr_state <= 13;
+        end
+        13: begin 
+            stMAC[2][2] <= 1;
 
             curr_state <= 14;
         end
         14: begin
-            stMAC[2][2] = 0;
+            stMAC[2][2] <= 0;
 
             if(doneMAC[2][2])
                 curr_state <= 15;
