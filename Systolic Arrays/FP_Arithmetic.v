@@ -7,7 +7,7 @@ output [7:0] e;
 output doneAdd;
 
 reg [2:0] Ea, Ed, Ee;
-reg [12:0] Fa, Fd, Fe; //{[11] overflow, [10:8] shift left space, [7] implied one, [6:3], original fraction, [2:0] shift right space};
+reg [12:0] Fa, Fd, Fe; 
 reg [2:0] state=0;
 reg Se,doneR;
 initial begin
@@ -26,17 +26,21 @@ assign doneAdd = doneR;
 // done
 always@ (posedge clk) begin
     case(state)
-        2'd0 : begin
+        3'd0 : begin
             Ea <= a[6:4];
             Ed <= d[6:4];
             Fa <= {2'b01,a[3:0],7'b0000000};
             Fd <= {2'b01,d[3:0],7'b0000000};
             if (stAdd) begin
                 doneR <=0; 
-                state <= 2'd1;
+                state <= 3'd1;
+                if(a==0)
+                    state <= 3'd5;
+                if(d==0)
+                    state <= 3'd6;
             end
         end
-        2'd1 : begin
+        3'd1 : begin
             if (Ea > Ed) begin
                 Ed <= Ed + 1;
                 Fd <= Fd >> 1;
@@ -47,10 +51,10 @@ always@ (posedge clk) begin
                     Fa <= Fa >> 1;
                 end
                 else 
-                    state <= 2'd2;
+                    state <= 3'd2;
             end
         end
-        2'd2 : begin
+        3'd2 : begin
             Ee <= Ea;
             state <= 3'd3;
             if({a[7] & d[7]}) begin
@@ -86,27 +90,42 @@ always@ (posedge clk) begin
                 end
             end            
         end
-        2'd3 : begin
-            if (Fe[12]) begin
-                Ee <= Ee+1;
-                Fe <= Fe >> 1;
-            end 
-            else begin
-                if(Fe[11] == 0) begin
-                    Ee <= Ee-1;
-                    Fe <= Fe << 1;
-                end 
-                else begin
-                    doneR <=1;
-                    if (~stAdd)
-                        state <= 0;
+        3'd3 : begin
+            if (Fe == 0) begin
+                Ee <= 0;
+                state <= 3'd4;
+            end else begin
+                if (Fe[12]) begin
+                    Ee <= Ee+1;
+                    Fe <= Fe >> 1;
+                end else begin
+                    if(Fe[11] == 0) begin
+                        Ee <= Ee-1;
+                        Fe <= Fe << 1;
+                    end 
+                    else
+                        state <= 3'd4; 
                 end
             end
-        end             
+        end
+        3'd4 : begin   
+            doneR <=1;
+            if (~stAdd)
+                state <= 0;
+        end
+        3'd5 : begin
+            Se <= d[7]; Ee <= d[6:4]; Fe[10:7] <= d[3:0];
+            state <= 3'd4;
+        end
+        3'd6 : begin
+            Se <= a[7]; Ee <= a[6:4]; Fe[10:7] <= a[3:0];
+            state <= 3'd4;
+        end
     endcase
 end
 
 endmodule
+
 
 
 module FP_Multiplier(
@@ -115,8 +134,7 @@ module FP_Multiplier(
     input [7:0] multiplicand,
     input [7:0] multiplier,
     output reg [7:0] product,
-    output reg done,
-    output reg V
+    output reg done
 );
 
 wire [2:0] EXP_multiplicand, EXP_multiplier;
@@ -130,8 +148,8 @@ assign S_multiplier = multiplier[7];
 assign EXP_multiplicand = multiplicand[6:4];
 assign EXP_multiplier = multiplier[6:4];
 
-assign FRC_multiplicand = (multiplicand[6:4] == 0) ? 0:{1'b1,multiplicand[3:0]};
-assign FRC_multiplier = (multiplier[6:4] == 0) ? 0:{1'b1,multiplier[3:0]};
+assign FRC_multiplicand = (multiplicand[6:0] == 0) ? 0:{1'b1,multiplicand[3:0]};
+assign FRC_multiplier = (multiplier[6:0] == 0) ? 0:{1'b1,multiplier[3:0]};
 
 assign sign_product = (multiplicand[7]^multiplier[7]);
 
@@ -142,7 +160,6 @@ reg [2:0] curr_state;
 
 initial begin
     done = 0;
-    V = 0;
     product = 0;
     EXP_product = 0;
     FRC_product = 0;
@@ -176,10 +193,6 @@ always @(posedge clk) begin
             end
         end
         3: begin        //End State
-            if(EXP_product[4])
-                V <= 1;
-            else
-                V <= 0;
             product <= {sign_product,EXP_product[2:0],FRC_product[3:0]};
             done <= 1;
             curr_state <= 0;

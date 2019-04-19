@@ -28,12 +28,11 @@ module Sys_Arrays(
     output [7:0] c20,
     output [7:0] c21,
     output [7:0] c22,
-    output done
+    output reg done
 );
 
-wire [7:0] a[3][3];
-wire [7:0] b[3][3];
-reg [7:0] c[3][3];
+wire [7:0] a[2:0][2:0];
+wire [7:0] b[2:0][2:0];
 
 assign a[0][0] = a00;
 assign a[0][1] = a01;
@@ -54,26 +53,16 @@ assign b[2][0] = b20;
 assign b[2][1] = b21;
 assign b[2][2] = b22;
 
-assign c00 = c[0][0];
-assign c01 = c[0][1];
-assign c02 = c[0][2];
-assign c10 = c[1][0];
-assign c11 = c[1][1];
-assign c12 = c[1][2];
-assign c20 = c[2][0];
-assign c21 = c[2][1];
-assign c22 = c[2][2];
-
 integer i,j;
 
-reg stMAC[3][3];
-wire doneMAC[3][3];
+reg stMAC[2:0][2:0];
+wire doneMAC[2:0][2:0];
 
 reg [7:0] a0X_in, a1X_in, a2X_in;
 reg [7:0] bX0_in, bX1_in, bX2_in;
 
-wire [7:0] pass_a[3][3];
-wire [7:0] pass_b[3][3];
+wire [7:0] pass_a[2:0][2:0];
+wire [7:0] pass_b[2:0][2:0];
 
 reg [3:0] curr_state;
 
@@ -83,15 +72,15 @@ reg [5:0] clk_counter;
 
 // This is the 3x3 assignment
 
-MAC c_00 (clk,a0X_in,bX0_in,stMAC[0][0],c[0][0],pass_a[0][0],pass_b[0][0],doneMAC[0][0]);
-MAC c_01 (clk,pass_a[0][0],bX1_in,stMAC[0][1],c[0][1],pass_a[0][1],pass_b[0][1],doneMAC[0][1]);
-MAC c_02 (clk,pass_a[0][1],bX2_in,stMAC[0][2],c[0][2],pass_a[0][2],pass_b[0][2],doneMAC[0][2]);
-MAC c_10 (clk,a1X_in,pass_b[0][0],stMAC[1][0],c[1][0],pass_a[1][0],pass_b[1][0],doneMAC[1][0]);
-MAC c_11 (clk,pass_a[1][0],pass_b[0][1],stMAC[1][1],c[1][1],pass_a[1][1],pass_b[1][1],doneMAC[1][1]);
-MAC c_12 (clk,pass_a[1][1],pass_b[0][2],stMAC[1][2],c[1][2],pass_a[1][2],pass_b[1][2],doneMAC[1][2]);
-MAC c_20 (clk,a2X_in,pass_b[1][0],stMAC[2][0],c[2][0],pass_a[2][0],pass_b[2][0],doneMAC[2][0]);
-MAC c_21 (clk,pass_a[2][0],pass_b[1][1],stMAC[2][1],c[2][1],pass_a[2][1],pass_b[2][1],doneMAC[2][1]);
-MAC c_22 (clk,pass_a[2][1],pass_b[1][2],stMAC[2][2],c[2][2],pass_a[2][2],pass_b[2][2],doneMAC[2][2]);
+MAC c_00 (clk,a0X_in,bX0_in,stMAC[0][0],c00,pass_a[0][0],pass_b[0][0],doneMAC[0][0]);
+MAC c_01 (clk,pass_a[0][0],bX1_in,stMAC[0][1],c01,pass_a[0][1],pass_b[0][1],doneMAC[0][1]);
+MAC c_02 (clk,pass_a[0][1],bX2_in,stMAC[0][2],c02,pass_a[0][2],pass_b[0][2],doneMAC[0][2]);
+MAC c_10 (clk,a1X_in,pass_b[0][0],stMAC[1][0],c10,pass_a[1][0],pass_b[1][0],doneMAC[1][0]);
+MAC c_11 (clk,pass_a[1][0],pass_b[0][1],stMAC[1][1],c11,pass_a[1][1],pass_b[1][1],doneMAC[1][1]);
+MAC c_12 (clk,pass_a[1][1],pass_b[0][2],stMAC[1][2],c12,pass_a[1][2],pass_b[1][2],doneMAC[1][2]);
+MAC c_20 (clk,a2X_in,pass_b[1][0],stMAC[2][0],c20,pass_a[2][0],pass_b[2][0],doneMAC[2][0]);
+MAC c_21 (clk,pass_a[2][0],pass_b[1][1],stMAC[2][1],c21,pass_a[2][1],pass_b[2][1],doneMAC[2][1]);
+MAC c_22 (clk,pass_a[2][1],pass_b[1][2],stMAC[2][2],c22,pass_a[2][2],pass_b[2][2],doneMAC[2][2]);
 
 
 
@@ -107,7 +96,6 @@ initial begin
 
     for(i = 0; i < 3; i = i+1) begin
         for(j = 0; j < 3; j = j+1) begin
-            c[i][j] = 0;
             stMAC[i][j] = 0;
         end
     end
@@ -126,7 +114,7 @@ initial begin
 end
 
 always@(posedge clk) begin
-    if(clk_counter == 50) begin
+    if(clk_counter == 5) begin
         clk_div = ~clk_div;
         clk_counter = 0;
     end
@@ -136,7 +124,7 @@ end
 
 
 always@(posedge clk_div) begin
-    case(curr_state) begin
+    case(curr_state)
         0: begin
             if(start)
                 curr_state <= 1;
