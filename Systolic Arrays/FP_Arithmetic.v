@@ -34,10 +34,11 @@ always@ (posedge clk) begin
             if (stAdd) begin
                 doneR <=0; 
                 state <= 3'd1;
-                if(a==0)
+                if(a[6:0]==0)
                     state <= 3'd5;
-                if(d==0)
+                else begin if(d[6:0]==0)
                     state <= 3'd6;
+                end
             end
         end
         3'd1 : begin
