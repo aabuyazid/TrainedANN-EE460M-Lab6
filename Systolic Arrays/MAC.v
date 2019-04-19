@@ -11,7 +11,7 @@ module MAC(
     output done
 );
 
-reg [7:0] a=0;
+reg [7:0] a=0, save_b=0, save_c =0;
 reg stAdd=0, stMul=0, doneR=0; 
 wire [7:0] e,d;
 wire doneAdd,doneMul;
@@ -26,6 +26,8 @@ always@( posedge clk) begin
     case(stateMAC)
         3'd0 : begin// start MAC
             if(stMAC) begin
+                save_b <= b;
+                save_c <= c;
                 doneR <=0;
                 stateMAC <= 1;
             end
@@ -52,8 +54,8 @@ always@( posedge clk) begin
             if(doneAdd) begin
                 a <= e;
                 stateMAC <= 6;
-                pass_b <= b;
-                pass_c <= c;
+                pass_b <= save_b;
+                pass_c <= save_c;
             end
         end
         3'd6: begin// when add is done MAC is done
